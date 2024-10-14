@@ -1753,8 +1753,8 @@ func (rs *ReplicationSuite) Run(ctx context.Context, storageClass string, client
 				if createdSnap.HasError() {
 					return delFunc, createdSnap.GetError()
 				}
-				if restoreSize != createdSnap.Object.Status.RestoreSize.s {
-					restoreSize = createdSnap.Object.Status.RestoreSize.s
+				if restoreSize != (*(createdSnap.Object.Status.RestoreSize)).s {
+					restoreSize = (*(createdSnap.Object.Status.RestoreSize)).s
 				}
 			}
 			snapReadyError := clients.SnapClientGA.WaitForAllToBeReady(ctx)
