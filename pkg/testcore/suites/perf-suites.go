@@ -1763,7 +1763,7 @@ func (rs *ReplicationSuite) Run(ctx context.Context, storageClass string, client
 			}
 		}
 	} else {
-		return delFunc, fmt.Errorf("can't get =GA snapshot client")
+		return delFunc, fmt.Errorf("can't get v1 snapshot client")
 	}
 
 	log.Info("Creating new pods with replicated volumes mounted on them")
