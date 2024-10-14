@@ -1662,6 +1662,7 @@ func (rs *ReplicationSuite) Run(ctx context.Context, storageClass string, client
 	pvcClient := clients.PVCClient
 	podClient := clients.PodClient
 	rgClient := clients.RgClient
+	restoreSize := rs.VolumeSize
 
 	if rs.VolumeNumber <= 0 {
 		log.Info("Using default number of volumes")
@@ -1674,6 +1675,7 @@ func (rs *ReplicationSuite) Run(ctx context.Context, storageClass string, client
 	if rs.VolumeSize == "" {
 		log.Info("Using default volume size : 3Gi")
 		rs.VolumeSize = "3Gi"
+		restoreSize = rs.VolumeSize
 	}
 	if rs.Image == "" {
 		rs.Image = "quay.io/centos/centos:latest"
@@ -1734,7 +1736,7 @@ func (rs *ReplicationSuite) Run(ctx context.Context, storageClass string, client
 				}
 				snapName := fmt.Sprintf("snap-%s", gotPvc.Name)
 				snapNameList = append(snapNameList, snapName)
-				createSnap := clients.SnapClientGA.Create(ctx,
+				createdSnap := clients.SnapClientGA.Create(ctx,
 					&snapv1.VolumeSnapshot{
 						ObjectMeta: metav1.ObjectMeta{
 							Name:         snapName,
@@ -1748,9 +1750,11 @@ func (rs *ReplicationSuite) Run(ctx context.Context, storageClass string, client
 							VolumeSnapshotClassName: &rs.SnapClass,
 						},
 					})
-				if createSnap.HasError() {
+				if createdSnap.HasError() {
 					return delFunc, createSnap.GetError()
 				}
+				if restoreSize != createdSnap.Object.Status.RestoreSize {
+					restoreSize = createdSnap.Object.Status.RestoreSize
 			}
 			snapReadyError := clients.SnapClientGA.WaitForAllToBeReady(ctx)
 			if snapReadyError != nil {
@@ -1789,7 +1793,7 @@ func (rs *ReplicationSuite) Run(ctx context.Context, storageClass string, client
 			return delFunc, snapReadyError
 		}
 	} else {
-		return delFunc, fmt.Errorf("can't get alpha or beta snapshot client")
+		return delFunc, fmt.Errorf("can't get beta or GA snapshot client")
 	}
 
 	log.Info("Creating new pods with replicated volumes mounted on them")
@@ -1797,7 +1801,7 @@ func (rs *ReplicationSuite) Run(ctx context.Context, storageClass string, client
 		pvcNameList := make([]string, rs.VolumeNumber)
 		for j := 0; j < rs.VolumeNumber; j++ {
 			// Restore PVCs
-			vcconf := testcore.VolumeCreationConfig(storageClass, rs.VolumeSize, "", "")
+			vcconf := testcore.VolumeCreationConfig(storageClass, restoreSize, "", "")
 			vcconf.SnapName = snapNameList[j+(i*rs.VolumeNumber)]
 			volTmpl := pvcClient.MakePVC(vcconf)
 
