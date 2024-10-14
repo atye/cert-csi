@@ -1762,42 +1762,8 @@ func (rs *ReplicationSuite) Run(ctx context.Context, storageClass string, client
 				return delFunc, snapReadyError
 			}
 		}
-	} else if clients.SnapClientBeta != nil {
-		for _, pvc := range allPvcNames {
-			gotPvc, err := pvcClient.Interface.Get(ctx, pvc, metav1.GetOptions{})
-			if err != nil {
-				return delFunc, err
-			}
-			snapName := fmt.Sprintf("snap-%s", gotPvc.Name)
-			snapNameList = append(snapNameList, snapName)
-			createdSnap := clients.SnapClientBeta.Create(ctx,
-				&snapbeta.VolumeSnapshot{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:         snapName,
-						GenerateName: "",
-						Namespace:    gotPvc.Namespace,
-					},
-					Spec: snapbeta.VolumeSnapshotSpec{
-						Source: snapbeta.VolumeSnapshotSource{
-							PersistentVolumeClaimName: &gotPvc.Name,
-						},
-						VolumeSnapshotClassName: &rs.SnapClass,
-					},
-				})
-			if createdSnap.HasError() {
-				return delFunc, createSnap.GetError()
-			}
-			if restoreSize != createdSnap.Object.Status.RestoreSize {
-				restoreSize = createdSnap.Object.Status.RestoreSize
-			}
-		}
-		// Wait for snapshot to be created
-		snapReadyError := clients.SnapClientBeta.WaitForAllToBeReady(ctx)
-		if snapReadyError != nil {
-			return delFunc, snapReadyError
-		}
 	} else {
-		return delFunc, fmt.Errorf("can't get beta or GA snapshot client")
+		return delFunc, fmt.Errorf("can't get =GA snapshot client")
 	}
 
 	log.Info("Creating new pods with replicated volumes mounted on them")
