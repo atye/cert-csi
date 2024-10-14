@@ -1751,7 +1751,7 @@ func (rs *ReplicationSuite) Run(ctx context.Context, storageClass string, client
 						},
 					})
 				if createdSnap.HasError() {
-					return delFunc, createSnap.GetError()
+					return delFunc, createSnapd.GetError()
 				}
 				if restoreSize != createdSnap.Object.Status.RestoreSize {
 					restoreSize = createdSnap.Object.Status.RestoreSize.s
