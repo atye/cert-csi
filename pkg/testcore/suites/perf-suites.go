@@ -1755,6 +1755,7 @@ func (rs *ReplicationSuite) Run(ctx context.Context, storageClass string, client
 				}
 				if restoreSize != createdSnap.Object.Status.RestoreSize {
 					restoreSize = createdSnap.Object.Status.RestoreSize
+				}
 			}
 			snapReadyError := clients.SnapClientGA.WaitForAllToBeReady(ctx)
 			if snapReadyError != nil {
@@ -1769,7 +1770,7 @@ func (rs *ReplicationSuite) Run(ctx context.Context, storageClass string, client
 			}
 			snapName := fmt.Sprintf("snap-%s", gotPvc.Name)
 			snapNameList = append(snapNameList, snapName)
-			createSnap := clients.SnapClientBeta.Create(ctx,
+			createdSnap := clients.SnapClientBeta.Create(ctx,
 				&snapbeta.VolumeSnapshot{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:         snapName,
@@ -1783,8 +1784,11 @@ func (rs *ReplicationSuite) Run(ctx context.Context, storageClass string, client
 						VolumeSnapshotClassName: &rs.SnapClass,
 					},
 				})
-			if createSnap.HasError() {
+			if createdSnap.HasError() {
 				return delFunc, createSnap.GetError()
+			}
+			if restoreSize != createdSnap.Object.Status.RestoreSize {
+				restoreSize = createdSnap.Object.Status.RestoreSize
 			}
 		}
 		// Wait for snapshot to be created
