@@ -1725,6 +1725,7 @@ func (rs *ReplicationSuite) Run(ctx context.Context, storageClass string, client
 		}
 		for iter := 0; iter < iters; iter++ {
 			initial := iter * 10
+			lastSnap := nil
 			final := initial + 10
 			if final > lenPvcList {
 				final = lenPvcList
@@ -1753,13 +1754,14 @@ func (rs *ReplicationSuite) Run(ctx context.Context, storageClass string, client
 				if createdSnap.HasError() {
 					return delFunc, createdSnap.GetError()
 				}
-				if restoreSize != createdSnap.Object.Status.RestoreSize.String() {
-					restoreSize = createdSnap.Object.Status.RestoreSize.String()
-				}
+				lastSnap = createdSnap
 			}
 			snapReadyError := clients.SnapClientGA.WaitForAllToBeReady(ctx)
 			if snapReadyError != nil {
 				return delFunc, snapReadyError
+			}
+			if restoreSize != lastSnap.Object.Status.RestoreSize.String() {
+				restoreSize = createdSnap.Object.Status.RestoreSize.String()
 			}
 		}
 	} else {
