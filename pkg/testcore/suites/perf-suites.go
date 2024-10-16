@@ -1725,11 +1725,11 @@ func (rs *ReplicationSuite) Run(ctx context.Context, storageClass string, client
 		}
 		for iter := 0; iter < iters; iter++ {
 			initial := iter * 10
-			lastSnap := nil
 			final := initial + 10
 			if final > lenPvcList {
 				final = lenPvcList
 			}
+			var lastSnap *snapv1client.Snapshot
 			for _, pvc := range allPvcNames[initial:final] {
 				gotPvc, err := pvcClient.Interface.Get(ctx, pvc, metav1.GetOptions{})
 				if err != nil {
@@ -1761,7 +1761,7 @@ func (rs *ReplicationSuite) Run(ctx context.Context, storageClass string, client
 				return delFunc, snapReadyError
 			}
 			if restoreSize != lastSnap.Object.Status.RestoreSize.String() {
-				restoreSize = createdSnap.Object.Status.RestoreSize.String()
+				restoreSize = lastSnap.Object.Status.RestoreSize.String()
 			}
 		}
 	} else {
