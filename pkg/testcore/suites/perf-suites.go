@@ -1754,17 +1754,19 @@ func (rs *ReplicationSuite) Run(ctx context.Context, storageClass string, client
 				if createdSnap.HasError() {
 					return delFunc, createdSnap.GetError()
 				}
+				log.Info('createdSnap: ', createdSnap)
 				lastSnap = createdSnap
+				log.Info('lastSnap: ', lastSnap)
 			}
 			snapReadyError := clients.SnapClientGA.WaitForAllToBeReady(ctx)
 			if snapReadyError != nil {
 				return delFunc, snapReadyError
 			}
-			log.Info("lastSnap: %+v", lastSnap)
-			log.Info("lastSnap.Object: %+v", lastSnap.Object)
-			log.Info("lastSnap.Object.Status: %+v", lastSnap.Object.Status)
-			log.Info("lastSnap.Object.Status.RestoreSize: %+v", lastSnap.Object.Status.RestoreSize)
-			log.Info("lastSnap.Object.StatusRestoreSize.String(): %+v", lastSnap.Object.Status.RestoreSize.String())
+			log.Info("lastSnap:", lastSnap)
+			log.Info("lastSnap.Object:", lastSnap.Object)
+			log.Info("lastSnap.Object.Status:", lastSnap.Object.Status)
+			log.Info("lastSnap.Object.Status.RestoreSize:", lastSnap.Object.Status.RestoreSize)
+			log.Info("lastSnap.Object.StatusRestoreSize.String():", lastSnap.Object.Status.RestoreSize.String())
 			if restoreSize != lastSnap.Object.Status.RestoreSize.String() {
 				restoreSize = lastSnap.Object.Status.RestoreSize.String()
 			}
