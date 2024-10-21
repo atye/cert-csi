@@ -1760,7 +1760,7 @@ func (rs *ReplicationSuite) Run(ctx context.Context, storageClass string, client
 			if snapReadyError != nil {
 				return delFunc, snapReadyError
 			}
-			lastSnap = snap.Sync(ctx)
+			lastSnap = lastSnap.Sync(ctx)
 			log.Debug("lastSnap:", lastSnap)
 			log.Debug("lastSnap.Object:", lastSnap.Object)
 			log.Debug("lastSnap.Object.Status:", lastSnap.Object.Status)
