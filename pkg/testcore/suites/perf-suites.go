@@ -1754,9 +1754,9 @@ func (rs *ReplicationSuite) Run(ctx context.Context, storageClass string, client
 				if createdSnap.HasError() {
 					return delFunc, createdSnap.GetError()
 				}
-				log.Info('createdSnap: ', createdSnap)
+				log.Info("createdSnap: ", createdSnap)
 				lastSnap = createdSnap
-				log.Info('lastSnap: ', lastSnap)
+				log.Info("lastSnap: ", lastSnap)
 			}
 			snapReadyError := clients.SnapClientGA.WaitForAllToBeReady(ctx)
 			if snapReadyError != nil {
