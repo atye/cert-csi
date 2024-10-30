@@ -2802,6 +2802,7 @@ func (mas *MultiAttachSuite) Run(ctx context.Context, storageClass string, clien
 // GenerateTopologySpreadConstraints creates and returns topology spread constraints
 func (mas *MultiAttachSuite) GenerateTopologySpreadConstraints(nodeCount int, labels map[string]string) []v1.TopologySpreadConstraint {
 	// Calculate MaxSkew parameter
+	nodeCount = 3
 	maxSkew, remainder := mas.PodNumber/nodeCount, mas.PodNumber%nodeCount
 	// in case of odd pod/node count - increase the maxSkew
 	if remainder != 0 {
